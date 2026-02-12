@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Chimera | The World Engine</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Roboto Mono', monospace; color: #00ff88; }
+        canvas { display: block; position: fixed; top: 0; left: 0; z-index: 1; }
+
+        .hud-container { position: relative; z-index: 10; pointer-events: none; height: 100vh; padding: 25px; }
+        .clickable { pointer-events: auto; }
+
+        .glass-panel {
+            background: rgba(0, 15, 5, 0.8);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 255, 136, 0.4);
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+
+        .sci-fi-header {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88;
+            border-bottom: 1px solid #00ff88;
+            margin-bottom: 15px;
+        }
+
+        .btn-chimera {
+            background: transparent;
+            color: #00ff88;
+            border: 1px solid #00ff88;
+            border-radius: 0;
+            font-size: 0.75rem;
+            transition: 0.3s;
+            width: 100%;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .btn-chimera:hover { background: #00ff88; color: #000; box-shadow: 0 0 15px #00ff88; }
+
+        .stat-value { font-size: 1.4rem; font-weight: bold; color: #fff; text-shadow: 0 0 5px #00ff88; }
+        
+        #console-logs {
+            background: rgba(0,0,0,0.5);
+            height: 100px;
+            overflow: hidden;
+            font-size: 0.7rem;
+            color: #00d9ff;
+            border-top: 1px solid #004455;
+            padding-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hud-container d-flex flex-column justify-content-between">
+        <!-- TOP: SYSTEM ANALYTICS -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="glass-panel p-3 clickable">
+                    <h6 class="sci-fi-header">SYSTEM CORE</h6>
+                    <div class="d-flex justify-content-between">
+                        <div><small>STABILITY</small><br><span class="stat-value" id="stability-val">100%</span></div>
+                        <div class="text-end"><small>ENTITIES</small><br><span class="stat-value" id="creature-count">0</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: EVOLUTIONARY CONTROL -->
+        <div class="row">
+            <div class="col-md-3 ms-auto">
+                <div class="glass-panel p-4 clickable">
+                    <h6 class="sci-fi-header">EVOLUTION RULES</h6>
+                    
+                    <div class="mb-2">
+                        <label class="small">Gravity: <span id="grav-display">-9.8</span></label>
+                        <input type="range" class="form-range" id="grav-slider" min="-25" max="5" step="0.1" value="-9.8">
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="small">Oxygen: <span id="oxy-display">0.50</span></label>
+                        <input type="range" class="form-range" id="oxy-slider" min="0" max="1" step="0.01" value="0.5">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="small">Mutation/Growth: <span id="growth-display">1.0</span></label>
+                        <input type="range" class="form-range" id="growth-slider" min="0.2" max="3" step="0.1" value="1.0">
+                    </div>
+
+                    <button class="btn btn-chimera" onclick="spawnCube()">SPAWN PRIMITIVE DNA</button>
+                    <button class="btn btn-chimera" onclick="spawnCharacter()">SPAWN ADVANCED LIFE</button>
+                    <button class="btn btn-chimera" style="color:#00d9ff; border-color:#00d9ff;" onclick="applyAIMutation()">✨ AI STABILIZE</button>
+                    <button class="btn btn-outline-danger w-100 mt-2" style="border-radius:0; font-size: 0.7rem;" onclick="resetWorld()">HARD RESET</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM: CONSOLE -->
+        <div class="row">
+            <div class="col-md-5">
+                <div class="glass-panel">
+                    <div id="console-logs">> BOOTING CHIMERA ENGINE v1.0.5...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+            "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js"
+        }
+    }
+    </script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>
