@@ -1,2 +1,2 @@
-# SilentShield
-SilentShield is an AI-powered safety system that detects distress gestures or physical struggle through a device camera and instantly sends a silent SOS with live location, timestamp, and visual evidence to trusted contacts, enabling fast, hands-free emergency response in critical situations.
+# Chimera
+Project Chimera is a real-time 3D evolution engine where users inject physics rules to shape, destabilize, and optimize a living digital ecosystem powered by AI-driven stability scoring.
