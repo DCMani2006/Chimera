@@ -1,14 +1,9 @@
 const express = require("express");
-const cors = require("cors");
-
-const worldRoutes = require("./routes/worldRoutes");
+const path = require("path");
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
-
-// No prefix
-app.use("/", worldRoutes);
+// Serve the frontend folder correctly
+app.use(express.static(path.join(__dirname, "../frontend")));
 
 module.exports = app;
