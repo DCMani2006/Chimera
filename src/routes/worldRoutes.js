@@ -5,11 +5,11 @@ const {
   submitRule,
   getCurrentRule,
   getAverageSurvivalRule,
+  mutateWorld,
 } = require("../controllers/worldController");
 
-// EXACT routes as per original spec
 router.post("/submitRule", submitRule);
 router.get("/currentRule", getCurrentRule);
 router.get("/averageSurvivalRule", getAverageSurvivalRule);
-
+router.post("/mutateWorld", mutateWorld);
 module.exports = router;

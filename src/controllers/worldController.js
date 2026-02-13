@@ -1,15 +1,31 @@
 // In-memory world storage
+
 const defaultWorld = {
+  id: 1,
   ruleName: "Default Earth",
   gravity: 9.8,
   growthRate: 1,
   oxygenLevel: 0.5,
   description: "Baseline Earth-like conditions",
 };
-let rules = [];
-let activeWorld = defaultWorld;
 
 let worlds = [];
+let activeWorld = null;
+
+/* ---------------- STABILITY ENGINE ---------------- */
+
+const calculateStability = (gravity, oxygenLevel, growthRate) => {
+  const rawStability =
+    100 -
+    Math.abs(gravity - 9.8) * 5 -
+    Math.abs(oxygenLevel - 0.5) * 20 -
+    Math.abs(growthRate - 1) * 15;
+
+  return Math.max(0, Math.min(100, rawStability));
+};
+
+/* ---------------- SEED SYSTEM ---------------- */
+
 const seedWorlds = [
   {
     ruleName: "Goliath's Burden",
@@ -17,7 +33,7 @@ const seedWorlds = [
     growthRate: 0.3,
     oxygenLevel: 0.9,
     description:
-      "A high-mass planet where skeletal structures are thick and plants grow low to the ground."
+      "A high-mass planet where skeletal structures are thick and plants grow low.",
   },
   {
     ruleName: "Ether Float",
@@ -25,7 +41,7 @@ const seedWorlds = [
     growthRate: 1.8,
     oxygenLevel: 0.15,
     description:
-      "Low gravity and high growth result in massive, thin-stalked flora."
+      "Low gravity and rapid growth produce massive thin flora.",
   },
   {
     ruleName: "The Lead Lung",
@@ -33,79 +49,79 @@ const seedWorlds = [
     growthRate: 1.1,
     oxygenLevel: 0.05,
     description:
-      "Heavy gravity combined with suffocating air makes exploration difficult."
-  }
+      "Heavy gravity with suffocating air.",
+  },
 ];
-
-
-const calculateStability = (gravity, oxygenLevel) => {
-  const rawStability =
-    100 -
-    Math.abs(gravity - 9.8) * 5 -
-    Math.abs(oxygenLevel - 0.5) * 20;
-
-  // Clamp between 0 and 100
-  return Math.max(0, Math.min(100, rawStability));
-};
-
 
 const seedIfEmpty = () => {
   if (worlds.length === 0) {
-    seedWorlds.forEach((world) => {
+    seedWorlds.forEach((world, index) => {
       const stabilityScore = calculateStability(
         world.gravity,
-        world.oxygenLevel
+        world.oxygenLevel,
+        world.growthRate
       );
 
       worlds.push({
-        id: worlds.length + 1,
+        id: index + 1,
         ...world,
-        stabilityScore
+        stabilityScore,
       });
     });
 
     activeWorld = worlds[0];
-
-    console.log("🌍 Default worlds seeded");
+    console.log("🌍 Worlds seeded");
   }
 };
 
-const submitRule = (req, res) => {
-  const { gravity } = req.body;
+/* ---------------- CONTROLLERS ---------------- */
 
-  // Validation
-  if (typeof gravity !== "number") {
+const submitRule = (req, res) => {
+  const { gravity, oxygenLevel, growthRate } = req.body;
+
+  if (
+    typeof gravity !== "number" ||
+    typeof oxygenLevel !== "number" ||
+    typeof growthRate !== "number"
+  ) {
     return res.status(400).json({
       success: false,
-      message: "gravity must be a number",
+      message: "gravity, oxygenLevel and growthRate must be numbers",
     });
   }
 
-  const stabilityScore = calculateStability(gravity);
-
-  const newRule = {
-    id: worlds.length + 1,
+  const stabilityScore = calculateStability(
     gravity,
+    oxygenLevel,
+    growthRate
+  );
+
+  const newWorld = {
+    id: worlds.length + 1,
+    ruleName: "Custom World",
+    gravity,
+    oxygenLevel,
+    growthRate,
     stabilityScore,
     createdAt: new Date(),
   };
 
-  worlds.push(newRule);
-  activeWorld = newRule;
+  worlds.push(newWorld);
+  activeWorld = newWorld;
 
   res.status(201).json({
     success: true,
-    message: "Rule submitted successfully",
-    data: newRule,
+    data: newWorld,
   });
 };
 
-
 const getCurrentRule = (req, res) => {
+  seedIfEmpty();
+
   if (!activeWorld) {
     return res.status(404).json({
       success: false,
-      message: "No active rule found",
+      message: "No active world found",
     });
   }
 
@@ -115,23 +131,8 @@ const getCurrentRule = (req, res) => {
   });
 };
 
-
-const getAllWorlds = (req, res) => {
-  res.json(worlds);
-};
-
 const getAverageSurvivalRule = (req, res) => {
-    if (rules.length === 0) {
-  const stabilityScore = calculateStability(
-    defaultWorld.gravity,
-    defaultWorld.oxygenLevel
-  );
-
-  return res.json({
-    ...defaultWorld,
-    stabilityScore,
-  });
-}
+  seedIfEmpty();
 
   if (worlds.length === 0) {
     return res.status(404).json({
@@ -160,8 +161,11 @@ const getAverageSurvivalRule = (req, res) => {
   });
 };
 
+/* ---------------- MUTATION ---------------- */
 
 const mutateWorld = (req, res) => {
+  seedIfEmpty();
+
   if (!activeWorld) {
     return res.status(404).json({
       success: false,
@@ -172,10 +176,7 @@ const mutateWorld = (req, res) => {
   const mutateValue = (value, min, max, intensity = 0.5) => {
     const change = (Math.random() - 0.5) * intensity;
     let newValue = value + change;
-
-    if (newValue < min) newValue = min;
-    if (newValue > max) newValue = max;
-
+    newValue = Math.max(min, Math.min(max, newValue));
     return parseFloat(newValue.toFixed(3));
   };
 
@@ -185,19 +186,19 @@ const mutateWorld = (req, res) => {
 
   activeWorld.stabilityScore = calculateStability(
     activeWorld.gravity,
-    activeWorld.oxygenLevel
+    activeWorld.oxygenLevel,
+    activeWorld.growthRate
   );
 
   res.json({
     success: true,
-    message: "World mutated successfully",
     data: activeWorld,
   });
 };
+
 module.exports = {
   submitRule,
   getCurrentRule,
   getAverageSurvivalRule,
+  mutateWorld,
 };
-
-
